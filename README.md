@@ -85,26 +85,4 @@ rm -f ~/.config/fish/set_terminal_theme.fish
 # (optionally) edit ~/.config/fish/config.fish to remove the call to set_terminal_theme
 ```
 
-## Create and push the GitHub repo
-
-Easiest with the GitHub CLI:
-
-```bash
-# from inside the folder
-gh repo create G33R0Y/kde-timebased-theming --public --source=. --remote=origin --push
-```
-
-Or create an empty repo on GitHub, then:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: time-based KDE theming"
-git branch -M main
-git remote add origin git@github.com:G33R0Y/kde-timebased-theming.git
-git push -u origin main
-```
-
----
-
 Happy theming ✨
