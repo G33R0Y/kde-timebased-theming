@@ -43,7 +43,7 @@ elif [ $HOUR -ge 18 ] && [ $HOUR -lt 24 ]; then
     THEME="sunset"
     COLOR_SCHEME="Sunset"
 else
-    WALLPAPER="$WALLPAPER_DIR/Examples/night_example.png"
+    WALLPAPER="$WALLPAPER_DIR/night.png"
     THEME="night"
     COLOR_SCHEME="Night"
 fi
