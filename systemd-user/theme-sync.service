@@ -1,0 +1,7 @@
+[Unit]
+Description=KDE Theme Synchronization (Wallpaper, Conky, System Theme)
+After=plasma-plasmashell.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash %h/scripts/rotate-wallpaper.sh

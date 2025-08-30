@@ -1,0 +1,10 @@
+[Unit]
+Description=Run theme sync at 6 AM, 12 PM, 6 PM, and midnight
+Requires=theme-sync.service
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
