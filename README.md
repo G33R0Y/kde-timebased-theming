@@ -8,6 +8,22 @@ Automates wallpaper + Plasma color scheme + Conky + Konsole profile based on tim
 
 Includes a systemd user timer that runs at 00:00, 06:00, 12:00, 18:00.
 
+## Themes Preview
+
+Here are previews of the wallpapers used for each time-based theme (already uploaded to the repo):
+
+### Sunrise
+![Sunrise Wallpaper](wallpapers/sunrise.png)
+
+### Noon
+![Noon Wallpaper](wallpapers/noon.png)
+
+### Sunset
+![Sunset Wallpaper](wallpapers/sunset.png)
+
+### Night
+![Night Wallpaper](wallpapers/night.png)
+
 ## Quick start (Arch/CachyOS, KDE Plasma 6)
 
 ```bash
