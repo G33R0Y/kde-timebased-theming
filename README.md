@@ -22,7 +22,7 @@ Here are previews of the wallpapers used for each time-based theme (already uplo
 ![Sunset Wallpaper](wallpapers/sunset.png)
 
 ### Night
-![Night Wallpaper](wallpapers/night.png)
+![Night Wallpaper](wallpapers/night_example.png)
 
 ## Quick start (Arch/CachyOS, KDE Plasma 6)
 
