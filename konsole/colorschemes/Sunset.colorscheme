@@ -1,59 +1,124 @@
 [Background]
 Color=77,42,26
-Transparency=0.95
 
-[Foreground]
-Color=245,230,220   # light beige (readable text)
+[BackgroundFaint]
+Color=77,42,26
 
-[Color0]  # Black (base → brighter earthy brown)
-Color=140,90,64
+[BackgroundIntense]
+Color=77,42,26
 
-[Color1]  # Red (main orange accent)
+[Color0]
+Color=255,179,128
+
+[Color0Faint]
+Color=255,179,128
+
+[Color0Intense]
+Color=255,179,128
+
+[Color1]
 Color=255,107,71
 
-[Color2]  # Green (secondary purple repurposed here)
-Color=179,102,255
-
-[Color3]  # Yellow (light orange accent)
-Color=255,153,102
-
-[Color4]  # Blue (deep warm brown, slightly lighter than bg)
-Color=110,60,40
-
-[Color5]  # Magenta (softer orange highlight)
-Color=255,127,91
-
-[Color6]  # Cyan (purple highlight)
+[Color10]
 Color=199,122,255
 
-[Color7]  # White (normal light text)
-Color=245,230,220
-
-[Color8]  # Bright Black (lighter warm brown)
-Color=160,100,75
-
-[Color9]  # Bright Red (softer highlight)
-Color=255,147,111
-
-[Color10] # Bright Green (lighter purple)
-Color=199,122,255
-
-[Color11] # Bright Yellow (hover-orange)
+[Color11]
 Color=255,173,122
 
-[Color12] # Bright Blue (warm cocoa tone)
+[Color12]
 Color=180,120,90
 
-[Color13] # Bright Magenta (orange-pink)
+[Color13]
 Color=255,147,111
 
-[Color14] # Bright Cyan (soft lavender highlight)
+[Color14]
 Color=219,142,255
 
-[Color15] # Bright White (very light beige for contrast)
+[Color15]
 Color=255,245,235
 
+[Color1Faint]
+Color=255,107,71
+
+[Color1Intense]
+Color=255,107,71
+
+[Color2]
+Color=179,102,255
+
+[Color2Faint]
+Color=179,102,255
+
+[Color2Intense]
+Color=179,102,255
+
+[Color3]
+Color=255,153,102
+
+[Color3Faint]
+Color=255,153,102
+
+[Color3Intense]
+Color=255,153,102
+
+[Color4]
+Color=110,60,40
+
+[Color4Faint]
+Color=110,60,40
+
+[Color4Intense]
+Color=110,60,40
+
+[Color5]
+Color=255,127,91
+
+[Color5Faint]
+Color=255,127,91
+
+[Color5Intense]
+Color=255,127,91
+
+[Color6]
+Color=199,122,255
+
+[Color6Faint]
+Color=199,122,255
+
+[Color6Intense]
+Color=199,122,255
+
+[Color7]
+Color=245,230,220
+
+[Color7Faint]
+Color=245,230,220
+
+[Color7Intense]
+Color=245,230,220
+
+[Color8]
+Color=255,179,128
+
+[Color9]
+Color=255,147,111
+
+[Foreground]
+Color=255,107,71
+
+[ForegroundFaint]
+Color=0,0,0
+
+[ForegroundIntense]
+Color=0,0,0
+
 [General]
+Anchor=0.5,0.5
+Blur=false
+ColorRandomization=false
 Description=Sunset
+FillStyle=Tile
 Opacity=0.95
 Wallpaper=
+WallpaperFlipType=NoFlip
+WallpaperOpacity=1

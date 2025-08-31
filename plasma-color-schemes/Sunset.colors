@@ -28,7 +28,7 @@ ForegroundInactive=200,200,200
 ForegroundLink=179,102,255           # purple (secondary)
 ForegroundNegative=255,127,91
 ForegroundNeutral=255,153,102
-ForegroundNormal=245,230,220         # light beige (readable text)
+ForegroundNormal=218,53,53
 ForegroundPositive=179,102,255
 ForegroundVisited=140,90,160
 
@@ -92,6 +92,9 @@ ForegroundVisited=160,100,180
 ColorScheme=Sunset
 Name=Sunset
 shadeSortColumn=true
+
+[KDE]
+contrast=7
 
 [WM]
 activeBackground=77,42,26
