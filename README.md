@@ -8,9 +8,7 @@ Automates wallpaper + Plasma color scheme + Conky + Konsole profile based on tim
 
 Includes a systemd user timer that runs at 00:00, 06:00, 12:00, 18:00.
 
-## Themes Preview
-
-Here are previews of the wallpapers used for each time-based theme (already uploaded to the repo):
+## Themes & Conky Preview
 
 ### Sunrise
 ![Sunrise Wallpaper](wallpapers/sunrise.png)
