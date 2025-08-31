@@ -21,8 +21,9 @@ cp -fv ~/.config/conky/theme_colors.lua "$REPO_DIR/conky/" || true
 cp -fv ~/.config/fish/config.fish "$REPO_DIR/fish/" || true
 cp -fv ~/.config/fish/functions/set_terminal_theme.fish "$REPO_DIR/fish/" || true
 
-# Wallpapers
+# Wallpapers (main directory and Examples subdirectory)
 cp -fv ~/Pictures/wallpapers/*.png "$REPO_DIR/wallpapers/" || true
+cp -fv ~/Pictures/wallpapers/Examples/*.png "$REPO_DIR/wallpapers/" || true
 
 # Main rotation script - sync BOTH ways
 echo "==> Syncing main rotation script"
@@ -52,4 +53,4 @@ git add .
 git commit -m "Sync: $(date '+%Y-%m-%d %H:%M:%S')" || echo "Nothing to commit"
 git push
 
-echo "==> Done. Main script and configs are synchronized."
+echo "==> Done. Main script, configs, wallpapers, and README are synchronized."
