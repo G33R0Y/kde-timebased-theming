@@ -30,7 +30,7 @@ A `systemd --user` timer applies changes **4× per day** (00:00, 06:00, 12:00, 1
 ![Sunrise Wallpaper](wallpapers/sunrise.png)
 
 ### Noon  
-![Noon Wallpaper](wallpapers/noon.png)
+![Noon Wallpaper](wallpapers/noon_example.png)
 
 ### Sunset  
 ![Sunset Wallpaper](wallpapers/sunset.png)
