@@ -34,13 +34,13 @@ ForegroundVisited=64,128,96
 
 [Colors:Selection]
 BackgroundAlternate=50,62,88
-BackgroundNormal=255,107,71
+BackgroundNormal=51,255,153
 DecorationFocus=128,179,255
 DecorationHover=148,199,255
 ForegroundActive=94,140,255
 ForegroundInactive=200,200,200
 ForegroundLink=122,237,186
-ForegroundNegative=255,147,111
+ForegroundNegative=51,255,153
 ForegroundNeutral=128,179,255
 ForegroundNormal=74,158,255
 ForegroundPositive=122,237,186
@@ -54,7 +54,7 @@ DecorationHover=148,199,255
 ForegroundActive=74,120,255
 ForegroundInactive=200,200,200
 ForegroundLink=102,217,166
-ForegroundNegative=255,147,111
+ForegroundNegative=51,255,153
 ForegroundNeutral=128,179,255
 ForegroundNormal=74,158,255
 ForegroundPositive=102,217,166
@@ -68,7 +68,7 @@ DecorationHover=148,199,255
 ForegroundActive=74,120,255
 ForegroundInactive=200,200,200
 ForegroundLink=102,217,166
-ForegroundNegative=255,147,111
+ForegroundNegative=51,255,153
 ForegroundNeutral=128,179,255
 ForegroundNormal=74,158,255
 ForegroundPositive=102,217,166
@@ -82,7 +82,7 @@ DecorationHover=148,199,255
 ForegroundActive=74,120,255
 ForegroundInactive=200,200,200
 ForegroundLink=102,217,166
-ForegroundNegative=255,147,111
+ForegroundNegative=51,255,153
 ForegroundNeutral=128,179,255
 ForegroundNormal=74,158,255
 ForegroundPositive=102,217,166
@@ -92,6 +92,9 @@ ForegroundVisited=64,128,96
 ColorScheme=Noon
 Name=Noon
 shadeSortColumn=true
+
+[KDE]
+contrast=7
 
 [WM]
 activeBackground=30,42,68

@@ -261,37 +261,42 @@ if pgrep -x "code" >/dev/null 2>&1 || pgrep -x "codium" >/dev/null 2>&1; then
 fi
 # =========================================================
 
-# Smart Konsole restart - start new one first, then close old ones
-if command -v konsole >/dev/null 2>&1 && pgrep -x konsole >/dev/null 2>&1; then
-    echo "Restarting Konsole to apply new theme" >> "$HOME/.local/share/wallpaper-sync.log"
-    
-    # Get current Konsole PIDs before starting new one
-    mapfile -t OLD_PIDS < <(pgrep -x konsole)
-    
-    # Start new Konsole with updated profile FIRST
-    nohup konsole --profile TimeBased >/dev/null 2>&1 &
-    NEW_PID=$!
-    disown
-    
-    # Give the new instance time to fully start
-    sleep 2
-    
-    # Now kill only the OLD instances (not the new one we just started)
-    if ((${#OLD_PIDS[@]})); then
-        echo "Closing old Konsole instances: ${OLD_PIDS[*]}" >> "$HOME/.local/share/wallpaper-sync.log"
-        for pid in "${OLD_PIDS[@]}"; do
-            # Make sure we don't kill the new process
-            if [ "$pid" != "$NEW_PID" ]; then
-                kill -TERM "$pid" 2>/dev/null || true
-            fi
-        done
+# Smart Konsole restart / ensure at least one instance is open
+if command -v konsole >/dev/null 2>&1; then
+    if pgrep -x konsole >/dev/null 2>&1; then
+        echo "Restarting Konsole to apply new theme" >> "$HOME/.local/share/wallpaper-sync.log"
+        
+        # Get current Konsole PIDs before starting new one
+        mapfile -t OLD_PIDS < <(pgrep -x konsole)
+        
+        # Start new Konsole with updated profile FIRST
+        nohup konsole --profile TimeBased >/dev/null 2>&1 &
+        NEW_PID=$!
+        disown
+        
+        # Give the new instance time to fully start
+        sleep 2
+        
+        # Kill old instances
+        if ((${#OLD_PIDS[@]})); then
+            echo "Closing old Konsole instances: ${OLD_PIDS[*]}" >> "$HOME/.local/share/wallpaper-sync.log"
+            for pid in "${OLD_PIDS[@]}"; do
+                if [ "$pid" != "$NEW_PID" ]; then
+                    kill -TERM "$pid" 2>/dev/null || true
+                fi
+            done
+        fi
+        
+        echo "Konsole restarted with new theme (PID: $NEW_PID)" >> "$HOME/.local/share/wallpaper-sync.log"
+    else
+        echo "No Konsole detected, starting one..." >> "$HOME/.local/share/wallpaper-sync.log"
+        nohup konsole --profile TimeBased >/dev/null 2>&1 &
+        disown
     fi
-    
-    echo "Konsole restarted with new theme (PID: $NEW_PID)" >> "$HOME/.local/share/wallpaper-sync.log"
 else
-    echo "Konsole not running" >> "$HOME/.local/share/wallpaper-sync.log"
+    echo "Konsole not installed" >> "$HOME/.local/share/wallpaper-sync.log"
 fi
-# ================================================================
+
 
 # Final status
 echo "Theme sync completed: $THEME (Color scheme applied: ${SCHEME_APPLIED:-false})" >> "$HOME/.local/share/wallpaper-sync.log"
