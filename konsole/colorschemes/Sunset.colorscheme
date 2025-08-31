@@ -62,13 +62,13 @@ Color=255,153,102
 Color=255,153,102
 
 [Color4]
-Color=110,60,40
+Color=255,0,0
 
 [Color4Faint]
-Color=110,60,40
+Color=255,0,0
 
 [Color4Intense]
-Color=110,60,40
+Color=255,0,0
 
 [Color5]
 Color=255,127,91
@@ -107,10 +107,10 @@ Color=255,147,111
 Color=255,107,71
 
 [ForegroundFaint]
-Color=0,0,0
+Color=255,107,71
 
 [ForegroundIntense]
-Color=0,0,0
+Color=255,107,71
 
 [General]
 Anchor=0.5,0.5
