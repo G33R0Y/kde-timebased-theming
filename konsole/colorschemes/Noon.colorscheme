@@ -17,7 +17,7 @@ Color=74,158,255
 Color=74,158,255
 
 [Color1]
-Color=255,107,71
+Color=255,255,0
 
 [Color10]
 Color=122,237,186
@@ -38,10 +38,10 @@ Color=84,148,116
 Color=220,220,220
 
 [Color1Faint]
-Color=255,107,71
+Color=255,255,0
 
 [Color1Intense]
-Color=255,107,71
+Color=255,255,0
 
 [Color2]
 Color=156,187,2
