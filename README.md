@@ -49,7 +49,7 @@ cd kde-timebased-theming
 ./install.sh
 
 # 2) Test once
-bash ~/scripts/rotate-wallpaper.sh
+~/.local/bin/rotate-wallpaper.sh
 ```
 
 📜 Logs are stored in:  
@@ -68,7 +68,7 @@ bash ~/scripts/rotate-wallpaper.sh
   - Conky config + Lua theme → `~/.config/conky/`
   - Fish config + helper → `~/.config/fish/`
   - Wallpapers (placeholders) → `~/Pictures/wallpapers/`
-  - Theme sync script → `~/scripts/rotate-wallpaper.sh`
+  - Theme sync script → `~/.local/bin/rotate-wallpaper.sh`
 - Enables the **systemd user timer**:  
   `theme-sync.timer` (runs 4×/day).
 
@@ -125,6 +125,14 @@ systemctl --user list-timers | grep theme-sync
 systemctl --user start theme-sync.service  # run immediately
 journalctl --user -u theme-sync.service -e --no-pager
 ```
+
+### Explanation
+
+* **`systemctl --user daemon-reload`** → Reloads the user-level systemd manager so it picks up new/changed units (needed after `install.sh` places them).
+* **`systemctl --user enable --now theme-sync.timer`** → Enables the timer persistently (autostart at login) and starts it immediately.
+* **`systemctl --user list-timers | grep theme-sync`** → Shows whether your timer is scheduled correctly (you should see the next activation time).
+* **`systemctl --user start theme-sync.service`** → Runs the service immediately once, without waiting for the timer. Good for testing.
+* **`journalctl --user -u theme-sync.service -e --no-pager`** → Lets you check logs for the service specifically (your `rotate-wallpaper.sh` output + errors).
 
 ---
 
