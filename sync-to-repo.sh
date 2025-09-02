@@ -51,11 +51,16 @@ mkdir -p "$REPO_DIR/fish"
 cp -fv ~/.config/fish/config.fish "$REPO_DIR/fish/" 2>/dev/null || echo "No Fish config.fish found" | tee -a "$LOG_FILE"
 cp -fv ~/.config/fish/functions/set_terminal_theme.fish "$REPO_DIR/fish/" 2>/dev/null || echo "No Fish set_terminal_theme.fish found" | tee -a "$LOG_FILE"
 
-# Wallpapers (main directory and Examples subdirectory)
+# Wallpapers
 echo "Copying wallpapers..." | tee -a "$LOG_FILE"
 mkdir -p "$REPO_DIR/wallpapers"
 cp -fv ~/Pictures/wallpapers/*.png "$REPO_DIR/wallpapers/" 2>/dev/null || echo "No wallpapers found in ~/Pictures/wallpapers" | tee -a "$LOG_FILE"
 cp -fv ~/Pictures/wallpapers/Examples/*.png "$REPO_DIR/wallpapers/" 2>/dev/null || echo "No wallpapers found in ~/Pictures/wallpapers/Examples" | tee -a "$LOG_FILE"
+
+# Lockscreen videos
+echo "Copying lockscreen videos..." | tee -a "$LOG_FILE"
+mkdir -p "$REPO_DIR/lockscreen"
+cp -fv ~/Videos/lockscreen/*.mp4 "$REPO_DIR/lockscreen/" 2>/dev/null || echo "No lockscreen videos found in ~/Videos/lockscreen" | tee -a "$LOG_FILE"
 
 # Main rotation script - sync BOTH ways
 echo "==> Syncing main rotation script" | tee -a "$LOG_FILE"
@@ -65,7 +70,6 @@ if [ -f "$MAIN_SCRIPT" ]; then
     repo_checksum=$(sha256sum "$REPO_DIR/scripts/rotate-wallpaper.sh" 2>/dev/null | awk '{print $1}' || echo "none")
     
     if [ "$local_checksum" != "$repo_checksum" ]; then
-        # Copy current main script to repo
         mkdir -p "$REPO_DIR/scripts"
         cp -fv "$MAIN_SCRIPT" "$REPO_DIR/scripts/rotate-wallpaper.sh" | tee -a "$LOG_FILE"
         echo "Copied main script to repo: $MAIN_SCRIPT -> $REPO_DIR/scripts/rotate-wallpaper.sh" | tee -a "$LOG_FILE"
@@ -104,7 +108,7 @@ else
     echo "WARNING: Install script not found at $INSTALL_SCRIPT" | tee -a "$LOG_FILE"
 fi
 
-# Check for stray files (e.g., sync-to-repo copy.sh)
+# Check for stray files
 echo "Checking for unexpected files..." | tee -a "$LOG_FILE"
 if [ -f "$REPO_DIR/sync-to-repo copy.sh" ]; then
     echo "WARNING: Found 'sync-to-repo copy.sh' in $REPO_DIR. Consider removing if not needed." | tee -a "$LOG_FILE"
@@ -114,11 +118,9 @@ fi
 echo "==> Git add + commit + push [$(date)]" | tee -a "$LOG_FILE"
 cd "$REPO_DIR"
 
-# Stage changes
 git add . >> "$LOG_FILE" 2>&1
-
-# Commit with detailed message
 CHANGED_FILES=$(git diff --name-only --cached)
+
 if [ -n "$CHANGED_FILES" ]; then
     echo "Changed files:" | tee -a "$LOG_FILE"
     echo "$CHANGED_FILES" | tee -a "$LOG_FILE"
@@ -133,7 +135,6 @@ else
     echo "Nothing to commit" | tee -a "$LOG_FILE"
 fi
 
-# Push with error handling
 if ! git push >> "$LOG_FILE" 2>&1; then
     echo "ERROR: Failed to push to remote. Check GitHub credentials (SSH key or PAT) and network." | tee -a "$LOG_FILE"
     echo "Run 'git -C $REPO_DIR push' manually to diagnose." | tee -a "$LOG_FILE"
@@ -143,5 +144,5 @@ else
     echo "Git push successful" | tee -a "$LOG_FILE"
 fi
 
-echo "==> Done. Main script, configs, wallpapers, systemd units, and install script are synchronized." | tee -a "$LOG_FILE"
+echo "==> Done. All configs, wallpapers, lockscreen videos, systemd units, and scripts are synchronized." | tee -a "$LOG_FILE"
 echo "---" >> "$LOG_FILE"

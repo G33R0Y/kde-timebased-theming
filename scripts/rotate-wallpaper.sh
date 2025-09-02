@@ -19,54 +19,83 @@ KONSOLE_PROFILE_DIR="$HOME/.local/share/konsole"
 PLASMA_COLOR_SCHEME_DIR="$HOME/.local/share/color-schemes"
 LOCK_SCREEN_CONFIG="$HOME/.config/kscreenlockerrc"
 KWRITECONFIG="/usr/bin/kwriteconfig6"
+LOCKSCREEN_VIDEO_DIR="$HOME/Videos/lockscreen"
 
 # Ensure directories exist
-mkdir -p "$WALLPAPER_DIR" "$KONSOLE_PROFILE_DIR" "$PLASMA_COLOR_SCHEME_DIR" "$HOME/.config"
+mkdir -p "$WALLPAPER_DIR" "$KONSOLE_PROFILE_DIR" "$PLASMA_COLOR_SCHEME_DIR" "$HOME/.config" "$LOCKSCREEN_VIDEO_DIR"
 
 # Get current time
 HOUR=$(date +%H)
 THEME=""
 WALLPAPER=""
 COLOR_SCHEME=""
+LOCKSCREEN_VIDEO=""
 
-# Determine wallpaper, theme, and color scheme based on time
+# Determine wallpaper, theme, color scheme, and lockscreen video based on time
 if [ $HOUR -ge 6 ] && [ $HOUR -lt 12 ]; then
     WALLPAPER="$WALLPAPER_DIR/sunrise.png"
     THEME="sunrise"
     COLOR_SCHEME="Sunrise"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunrise.mp4"
 elif [ $HOUR -ge 12 ] && [ $HOUR -lt 18 ]; then
     WALLPAPER="$WALLPAPER_DIR/noon.png"
     THEME="noon"
     COLOR_SCHEME="Noon"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/noon.mp4"
 elif [ $HOUR -ge 18 ] && [ $HOUR -lt 24 ]; then
     WALLPAPER="$WALLPAPER_DIR/sunset.png"
     THEME="sunset"
     COLOR_SCHEME="Sunset"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunset.mp4"
 else
     WALLPAPER="$WALLPAPER_DIR/night.png"
     THEME="night"
     COLOR_SCHEME="Night"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/night.mp4"
 fi
 
 # Log theme change
-echo "$(date): Switching to $THEME theme (Wallpaper: $WALLPAPER, ColorScheme: $COLOR_SCHEME)" >> "$HOME/.local/share/wallpaper-sync.log"
+echo "$(date): Switching to $THEME theme (Wallpaper: $WALLPAPER, ColorScheme: $COLOR_SCHEME, Lockscreen video: $LOCKSCREEN_VIDEO)" >> "$HOME/.local/share/wallpaper-sync.log"
 
 # Check if files exist
 if [ ! -f "$WALLPAPER" ]; then
     echo "Warning: Wallpaper $WALLPAPER not found" >> "$HOME/.local/share/wallpaper-sync.log"
-    exit 1
 fi
 
 if [ ! -f "$PLASMA_COLOR_SCHEME_DIR/$COLOR_SCHEME.colors" ]; then
     echo "Warning: Plasma color scheme $COLOR_SCHEME.colors not found" >> "$HOME/.local/share/wallpaper-sync.log"
-    exit 1
 fi
 
-# Update lock screen wallpaper
+# --- Lockscreen video handling ---
+if [ -f "$LOCKSCREEN_VIDEO" ]; then
+    qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+    var allDesktops = desktops();
+    for (var i=0; i<allDesktops.length; i++) {
+        var d = allDesktops[i];
+        if (d.wallpaperPlugin == 'org.kde.plasma.smartvideo') {
+            d.currentConfigGroup = Array('Wallpaper','org.kde.plasma.smartvideo','General');
+            d.writeConfig('source', 'file://$LOCKSCREEN_VIDEO');
+            d.writeConfig('lockScreenMode', 'true');
+        }
+    }
+    " >/dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "Applied lockscreen video: $LOCKSCREEN_VIDEO" >> "$HOME/.local/share/wallpaper-sync.log"
+    else
+        echo "Failed to apply lockscreen video: $LOCKSCREEN_VIDEO" >> "$HOME/.local/share/wallpaper-sync.log"
+    fi
+else
+    echo "Warning: Lockscreen video $LOCKSCREEN_VIDEO not found" >> "$HOME/.local/share/wallpaper-sync.log"
+fi
+
+# --- Existing code below remains unchanged ---
+
+# Update lock screen static wallpaper (fallback if plugin not active)
 if command -v "$KWRITECONFIG" >/dev/null && [ -f "$WALLPAPER" ] && ! pgrep -x "kscreenlocker" > /dev/null; then
     "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" --group Greeter --group Wallpaper --group org.kde.image --group General --key Image "file://$WALLPAPER" 2>/dev/null
     if [ $? -eq 0 ]; then
-        echo "Updated lock screen wallpaper: $WALLPAPER" >> "$HOME/.local/share/wallpaper-sync.log"
+        echo "Updated static lock screen wallpaper (fallback): $WALLPAPER" >> "$HOME/.local/share/wallpaper-sync.log"
     fi
 fi
 
@@ -112,10 +141,8 @@ else
     echo -e "\n[DesktopEntry]\nDefaultProfile=TimeBased.profile" >> "$KONSOLERC"
 fi
 
-# Apply Plasma color scheme - the SIMPLE way
+# Apply Plasma color scheme
 echo "Applying Plasma color scheme: $COLOR_SCHEME" >> "$HOME/.local/share/wallpaper-sync.log"
-
-# Use the exact same command that works manually
 PLASMA_OUTPUT=$(plasma-apply-colorscheme "$COLOR_SCHEME" 2>&1)
 PLASMA_EXIT_CODE=$?
 
@@ -129,7 +156,6 @@ else
     echo "FAILED: Could not apply Plasma color scheme: $COLOR_SCHEME" >> "$HOME/.local/share/wallpaper-sync.log"
     SCHEME_APPLIED=false
     
-    # Simple fallback: try once more after a short delay
     sleep 2
     echo "Retrying plasma-apply-colorscheme..." >> "$HOME/.local/share/wallpaper-sync.log"
     PLASMA_OUTPUT2=$(plasma-apply-colorscheme "$COLOR_SCHEME" 2>&1)
