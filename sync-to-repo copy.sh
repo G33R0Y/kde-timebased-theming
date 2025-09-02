@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="$HOME/Downloads/kde-timebased-theming"
-MAIN_SCRIPT="$HOME/.local/bin/rotate-wallpaper.sh"
+MAIN_SCRIPT="$HOME/scripts/rotate-wallpaper.sh"
 
 echo "==> Syncing configs into $REPO_DIR"
 
@@ -47,17 +47,10 @@ if [ -f "$REPO_DIR/scripts/rotate-wallpaper.sh" ]; then
     fi
 fi
 
-# Systemd units - add syncing for these
-cp -fv ~/.config/systemd/user/theme-sync.service "$REPO_DIR/systemd-user/" || true
-cp -fv ~/.config/systemd/user/theme-sync.timer "$REPO_DIR/systemd-user/" || true
-
-# Install script - if changed, sync it too
-cp -fv ~/install.sh "$REPO_DIR/" || true  # Assuming install.sh is in ~, adjust if needed
-
 echo "==> Git add + commit + push"
 cd "$REPO_DIR"
 git add .
 git commit -m "Sync: $(date '+%Y-%m-%d %H:%M:%S')" || echo "Nothing to commit"
 git push
 
-echo "==> Done. Main script, configs, wallpapers, systemd units, install script, and README are synchronized."
+echo "==> Done. Main script, configs, wallpapers, and README are synchronized."
