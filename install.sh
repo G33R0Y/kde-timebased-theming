@@ -43,6 +43,15 @@ cp -fv lockscreen/*.mp4 "$HOME/Videos/lockscreen/" || true
 cp -fv scripts/rotate-wallpaper.sh "$HOME/.local/bin/"
 chmod +x "$HOME/.local/bin/rotate-wallpaper.sh"
 
+# Lockscreen config
+if [ -f lockscreen/kscreenlockerrc ]; then
+    echo "==> Installing lockscreen config..."
+    cp -fv lockscreen/kscreenlockerrc "$HOME/.config/kscreenlockerrc"
+    # Rewrite placeholders (~) to actual $HOME paths
+    sed -i "s|~/Pictures|$HOME/Pictures|g" "$HOME/.config/kscreenlockerrc"
+    sed -i "s|~/Videos|$HOME/Videos|g" "$HOME/.config/kscreenlockerrc"
+fi
+
 echo "==> Installing systemd user units..."
 cp -fv systemd-user/theme-sync.service "$HOME/.config/systemd/user/"
 cp -fv systemd-user/theme-sync.timer "$HOME/.config/systemd/user/"
