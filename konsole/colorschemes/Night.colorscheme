@@ -62,13 +62,13 @@ Color=143,163,255
 Color=143,163,255
 
 [Color4]
-Color=0,0,172
+Color=0,55,134
 
 [Color4Faint]
-Color=0,0,172
+Color=0,55,134
 
 [Color4Intense]
-Color=0,0,172
+Color=0,65,156
 
 [Color5]
 Color=107,160,255
