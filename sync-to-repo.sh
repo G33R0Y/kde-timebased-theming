@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_DIR="$HOME/Downloads/kde-timebased-theming"
 MAIN_SCRIPT="$HOME/.local/bin/rotate-wallpaper.sh"
 LOG_FILE="$HOME/.local/share/sync-to-repo.log"
-INSTALL_SCRIPT="$HOME/install.sh"  # Adjustable if needed
+INSTALL_SCRIPT="$REPO_DIR/install.sh"  # Install script is already in repo
 
 # Ensure log directory exists
 mkdir -p "$(dirname "$LOG_FILE")"
@@ -33,6 +33,11 @@ echo "Copying Konsole configs..." | tee -a "$LOG_FILE"
 mkdir -p "$REPO_DIR/konsole/colorschemes"
 cp -fv ~/.local/share/konsole/*.colorscheme "$REPO_DIR/konsole/colorschemes/" 2>/dev/null || echo "No Konsole colorschemes found" | tee -a "$LOG_FILE"
 cp -fv ~/.local/share/konsole/TimeBased.profile "$REPO_DIR/konsole/" 2>/dev/null || echo "No Konsole TimeBased.profile found" | tee -a "$LOG_FILE"
+
+# Check for stray Konsole colorschemes (e.g., Sunrise copy.colorscheme)
+if [ -f "$REPO_DIR/konsole/colorschemes/Sunrise copy.colorscheme" ]; then
+    echo "WARNING: Found 'Sunrise copy.colorscheme' in $REPO_DIR/konsole/colorschemes. Consider removing if not needed." | tee -a "$LOG_FILE"
+fi
 
 # Conky
 echo "Copying Conky configs..." | tee -a "$LOG_FILE"
@@ -91,12 +96,18 @@ mkdir -p "$REPO_DIR/systemd-user"
 cp -fv ~/.config/systemd/user/theme-sync.service "$REPO_DIR/systemd-user/" 2>/dev/null || echo "No theme-sync.service found" | tee -a "$LOG_FILE"
 cp -fv ~/.config/systemd/user/theme-sync.timer "$REPO_DIR/systemd-user/" 2>/dev/null || echo "No theme-sync.timer found" | tee -a "$LOG_FILE"
 
-# Install script
-echo "Copying install script..." | tee -a "$LOG_FILE"
+# Install script - skip copy since it's already in REPO_DIR
+echo "Checking install script..." | tee -a "$LOG_FILE"
 if [ -f "$INSTALL_SCRIPT" ]; then
-    cp -fv "$INSTALL_SCRIPT" "$REPO_DIR/" | tee -a "$LOG_FILE"
+    echo "Install script already in repo at $INSTALL_SCRIPT, no copy needed" | tee -a "$LOG_FILE"
 else
     echo "WARNING: Install script not found at $INSTALL_SCRIPT" | tee -a "$LOG_FILE"
+fi
+
+# Check for stray files (e.g., sync-to-repo copy.sh)
+echo "Checking for unexpected files..." | tee -a "$LOG_FILE"
+if [ -f "$REPO_DIR/sync-to-repo copy.sh" ]; then
+    echo "WARNING: Found 'sync-to-repo copy.sh' in $REPO_DIR. Consider removing if not needed." | tee -a "$LOG_FILE"
 fi
 
 # Git operations
@@ -112,6 +123,12 @@ if [ -n "$CHANGED_FILES" ]; then
     echo "Changed files:" | tee -a "$LOG_FILE"
     echo "$CHANGED_FILES" | tee -a "$LOG_FILE"
     git commit -m "Sync: $(date '+%Y-%m-%d %H:%M:%S') - Updated configs: $(echo "$CHANGED_FILES" | tr '\n' ', ' | sed 's/, $//')" >> "$LOG_FILE" 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Git commit successful" | tee -a "$LOG_FILE"
+    else
+        echo "ERROR: Git commit failed. Check $LOG_FILE for details." | tee -a "$LOG_FILE"
+        exit 1
+    fi
 else
     echo "Nothing to commit" | tee -a "$LOG_FILE"
 fi
@@ -120,7 +137,10 @@ fi
 if ! git push >> "$LOG_FILE" 2>&1; then
     echo "ERROR: Failed to push to remote. Check GitHub credentials (SSH key or PAT) and network." | tee -a "$LOG_FILE"
     echo "Run 'git -C $REPO_DIR push' manually to diagnose." | tee -a "$LOG_FILE"
+    echo "Note: If using an SSH key with a passphrase, automation (e.g., cron) requires ssh-agent or a key without a passphrase." | tee -a "$LOG_FILE"
     exit 1
+else
+    echo "Git push successful" | tee -a "$LOG_FILE"
 fi
 
 echo "==> Done. Main script, configs, wallpapers, systemd units, and install script are synchronized." | tee -a "$LOG_FILE"
