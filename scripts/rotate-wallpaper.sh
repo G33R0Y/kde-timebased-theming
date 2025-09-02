@@ -36,23 +36,24 @@ if [ $HOUR -ge 6 ] && [ $HOUR -lt 12 ]; then
     WALLPAPER="$WALLPAPER_DIR/sunrise.png"
     THEME="sunrise"
     COLOR_SCHEME="Sunrise"
-    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunrise.mp4"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunrise_screeny.mp4"
 elif [ $HOUR -ge 12 ] && [ $HOUR -lt 18 ]; then
     WALLPAPER="$WALLPAPER_DIR/noon.png"
     THEME="noon"
     COLOR_SCHEME="Noon"
-    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/noon.mp4"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/noon_screeny.mp4"
 elif [ $HOUR -ge 18 ] && [ $HOUR -lt 24 ]; then
     WALLPAPER="$WALLPAPER_DIR/sunset.png"
     THEME="sunset"
     COLOR_SCHEME="Sunset"
-    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunset.mp4"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/sunset_screeny.mp4"
 else
     WALLPAPER="$WALLPAPER_DIR/night.png"
     THEME="night"
     COLOR_SCHEME="Night"
-    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/night.mp4"
+    LOCKSCREEN_VIDEO="$LOCKSCREEN_VIDEO_DIR/night_screeny.mp4"
 fi
+
 
 # Log theme change
 echo "$(date): Switching to $THEME theme (Wallpaper: $WALLPAPER, ColorScheme: $COLOR_SCHEME, Lockscreen video: $LOCKSCREEN_VIDEO)" >> "$HOME/.local/share/wallpaper-sync.log"
@@ -66,28 +67,35 @@ if [ ! -f "$PLASMA_COLOR_SCHEME_DIR/$COLOR_SCHEME.colors" ]; then
     echo "Warning: Plasma color scheme $COLOR_SCHEME.colors not found" >> "$HOME/.local/share/wallpaper-sync.log"
 fi
 
-# --- Lockscreen video handling ---
-if [ -f "$LOCKSCREEN_VIDEO" ]; then
-    qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
-    var allDesktops = desktops();
-    for (var i=0; i<allDesktops.length; i++) {
-        var d = allDesktops[i];
-        if (d.wallpaperPlugin == 'org.kde.plasma.smartvideo') {
-            d.currentConfigGroup = Array('Wallpaper','org.kde.plasma.smartvideo','General');
-            d.writeConfig('source', 'file://$LOCKSCREEN_VIDEO');
-            d.writeConfig('lockScreenMode', 'true');
-        }
-    }
-    " >/dev/null 2>&1
+# --- Lockscreen video handling (Smart Video Wallpaper Reborn) ---
+PLUGIN_ID="luisbocanegra.smart.video.wallpaper.reborn"
 
-    if [ $? -eq 0 ]; then
-        echo "Applied lockscreen video: $LOCKSCREEN_VIDEO" >> "$HOME/.local/share/wallpaper-sync.log"
+if [ -f "$LOCKSCREEN_VIDEO" ]; then
+    if command -v "$KWRITECONFIG" >/dev/null; then
+        # Make sure the greeter (lock screen) uses the correct plugin
+        "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+            --group Greeter --key WallpaperPlugin "$PLUGIN_ID"
+
+        # Build the JSON list the plugin expects (single video entry)
+        VIDEO_JSON=$(printf '[{"filename":"file://%s","enabled":true,"repeat":true,"muted":true,"duration":0,"customDuration":0,"playbackRate":0}]' "$LOCKSCREEN_VIDEO")
+
+        # Write the new video list + reset position
+        "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+            --group Greeter --group Wallpaper --group "$PLUGIN_ID" --group General \
+            --key VideoUrls "$VIDEO_JSON"
+
+        "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+            --group Greeter --group Wallpaper --group "$PLUGIN_ID" --group General \
+            --key LastVideoPosition "0"
+
+        echo "Updated lockscreen video (Reborn): $LOCKSCREEN_VIDEO" >> "$HOME/.local/share/wallpaper-sync.log"
     else
-        echo "Failed to apply lockscreen video: $LOCKSCREEN_VIDEO" >> "$HOME/.local/share/wallpaper-sync.log"
+        echo "Error: kwriteconfig6 not found, cannot update lockscreen video" >> "$HOME/.local/share/wallpaper-sync.log"
     fi
 else
     echo "Warning: Lockscreen video $LOCKSCREEN_VIDEO not found" >> "$HOME/.local/share/wallpaper-sync.log"
 fi
+
 
 # --- Existing code below remains unchanged ---
 

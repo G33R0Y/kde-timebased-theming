@@ -62,6 +62,15 @@ echo "Copying lockscreen videos..." | tee -a "$LOG_FILE"
 mkdir -p "$REPO_DIR/lockscreen"
 cp -fv ~/Videos/lockscreen/*.mp4 "$REPO_DIR/lockscreen/" 2>/dev/null || echo "No lockscreen videos found in ~/Videos/lockscreen" | tee -a "$LOG_FILE"
 
+# Copy the kscreenlockerrc (lock-screen config) so the repo tracks the plugin settings
+echo "Copying lockscreen config (kscreenlockerrc)..." | tee -a "$LOG_FILE"
+mkdir -p "$REPO_DIR/lockscreen"
+if [ -f "$HOME/.config/kscreenlockerrc" ]; then
+    cp -fv "$HOME/.config/kscreenlockerrc" "$REPO_DIR/lockscreen/kscreenlockerrc" | tee -a "$LOG_FILE"
+else
+    echo "No ~/.config/kscreenlockerrc found; skipping." | tee -a "$LOG_FILE"
+fi
+
 # Main rotation script - sync BOTH ways
 echo "==> Syncing main rotation script" | tee -a "$LOG_FILE"
 if [ -f "$MAIN_SCRIPT" ]; then
@@ -118,23 +127,24 @@ fi
 echo "==> Git add + commit + push [$(date)]" | tee -a "$LOG_FILE"
 cd "$REPO_DIR"
 
-git add . >> "$LOG_FILE" 2>&1
-CHANGED_FILES=$(git diff --name-only --cached)
+# Stage changes (including new or removed files)
+git add -A >> "$LOG_FILE" 2>&1
+
+# Get staged changed files
+CHANGED_FILES=$(git diff --name-only --staged || true)
 
 if [ -n "$CHANGED_FILES" ]; then
-    echo "Changed files:" | tee -a "$LOG_FILE"
+    echo "Changed files staged for commit:" | tee -a "$LOG_FILE"
     echo "$CHANGED_FILES" | tee -a "$LOG_FILE"
-    git commit -m "Sync: $(date '+%Y-%m-%d %H:%M:%S') - Updated configs: $(echo "$CHANGED_FILES" | tr '\n' ', ' | sed 's/, $//')" >> "$LOG_FILE" 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Git commit successful" | tee -a "$LOG_FILE"
-    else
-        echo "ERROR: Git commit failed. Check $LOG_FILE for details." | tee -a "$LOG_FILE"
+    git commit -m "Sync: $(date '+%Y-%m-%d %H:%M:%S') - Updated configs: $(echo "$CHANGED_FILES" | tr '\n' ', ' | sed 's/, $//')" >> "$LOG_FILE" 2>&1 || {
+        echo "ERROR: Git commit failed. See $LOG_FILE for details." | tee -a "$LOG_FILE"
         exit 1
-    fi
+    }
 else
     echo "Nothing to commit" | tee -a "$LOG_FILE"
 fi
 
+# Push with error handling
 if ! git push >> "$LOG_FILE" 2>&1; then
     echo "ERROR: Failed to push to remote. Check GitHub credentials (SSH key or PAT) and network." | tee -a "$LOG_FILE"
     echo "Run 'git -C $REPO_DIR push' manually to diagnose." | tee -a "$LOG_FILE"

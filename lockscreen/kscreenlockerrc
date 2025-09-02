@@ -1,0 +1,16 @@
+[Greeter]
+FillMode=2
+Wallpaper=file:///home/geeroy/Pictures/wallpapers/night.png
+WallpaperPlugin=luisbocanegra.smart.video.wallpaper.reborn
+
+[Greeter][Wallpaper][luisbocanegra.smart.video.wallpaper.reborn][General]
+LastVideoPosition=583
+VideoUrls=[{"filename":"file:///home/geeroy/Videos/lockscreen/night_screeny.mp4","enabled":true,"repeat":true,"muted":true,"duration":0,"customDuration":0,"playbackRate":0}]
+
+[Greeter][Wallpaper][org.kde.image][General]
+Image=file:///home/geeroy/Pictures/wallpapers/night.png
+SlidePaths=/usr/share/wallpapers/
+
+[Greeter][Wallpaper][org.kde.plasma.smartvideo][General]
+lockScreenMode=true
+source=file:///home/geeroy/Videos/lockscreen/night_screeny.mp4

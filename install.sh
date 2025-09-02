@@ -50,7 +50,11 @@ systemctl --user daemon-reload
 systemctl --user enable --now theme-sync.timer
 
 # --- Smart Video Wallpaper Reborn ---
-if ! plasmapkg2 --list | grep -q "org.kde.plasma.smartvideo"; then
+PLUGIN_ID="luisbocanegra.smart.video.wallpaper.reborn"
+LOCK_SCREEN_CONFIG="$HOME/.config/kscreenlockerrc"
+KWRITECONFIG="/usr/bin/kwriteconfig6"
+
+if ! plasmapkg2 --list | grep -q "$PLUGIN_ID"; then
     echo "==> Installing Smart Video Wallpaper Reborn (for lockscreen videos)..."
     TMPDIR=$(mktemp -d)
     git clone https://github.com/luisbocanegra/plasma-smart-video-wallpaper-reborn.git "$TMPDIR"
@@ -63,6 +67,30 @@ if ! plasmapkg2 --list | grep -q "org.kde.plasma.smartvideo"; then
     rm -rf "$TMPDIR"
 else
     echo "Smart Video Wallpaper Reborn already installed."
+fi
+
+# --- Initialize lockscreen to use Smart Video Wallpaper Reborn ---
+if command -v "$KWRITECONFIG" >/dev/null; then
+    echo "==> Initializing lockscreen video config..."
+    "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+        --group Greeter --key WallpaperPlugin "$PLUGIN_ID"
+
+    # Default to sunrise video so the plugin has valid state
+    DEFAULT_VIDEO="$HOME/Videos/lockscreen/sunrise_screeny.mp4"
+    if [ -f "$DEFAULT_VIDEO" ]; then
+        VIDEO_JSON=$(printf '[{"filename":"file://%s","enabled":true,"repeat":true,"muted":true,"duration":0,"customDuration":0,"playbackRate":0}]' "$DEFAULT_VIDEO")
+        "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+            --group Greeter --group Wallpaper --group "$PLUGIN_ID" --group General \
+            --key VideoUrls "$VIDEO_JSON"
+        "$KWRITECONFIG" --file "$LOCK_SCREEN_CONFIG" \
+            --group Greeter --group Wallpaper --group "$PLUGIN_ID" --group General \
+            --key LastVideoPosition "0"
+        echo "Lockscreen initialized with $DEFAULT_VIDEO"
+    else
+        echo "WARNING: Default lockscreen video not found ($DEFAULT_VIDEO)."
+    fi
+else
+    echo "WARNING: kwriteconfig6 not available, skipping lockscreen initialization."
 fi
 
 echo "==> Done!"
