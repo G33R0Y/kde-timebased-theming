@@ -20,7 +20,7 @@ IntensityEffect=0
 
 [Colors:Button]
 BackgroundAlternate=46,52,84
-BackgroundNormal=26,32,64
+BackgroundNormal=0,29,90
 DecorationFocus=143,163,255
 DecorationHover=163,183,255
 ForegroundActive=107,160,255
@@ -62,7 +62,7 @@ ForegroundVisited=64,96,128
 
 [Colors:View]
 BackgroundAlternate=46,52,84
-BackgroundNormal=26,32,64
+BackgroundNormal=0,29,90
 DecorationFocus=143,163,255
 DecorationHover=163,183,255
 ForegroundActive=107,160,255
@@ -76,7 +76,7 @@ ForegroundVisited=64,96,128
 
 [Colors:Window]
 BackgroundAlternate=46,52,84
-BackgroundNormal=26,32,64
+BackgroundNormal=0,20,71
 DecorationFocus=143,163,255
 DecorationHover=163,183,255
 ForegroundActive=107,160,255
@@ -92,6 +92,9 @@ ForegroundVisited=64,96,128
 ColorScheme=Night
 Name=Night
 shadeSortColumn=true
+
+[KDE]
+contrast=7
 
 [WM]
 activeBackground=26,32,64
