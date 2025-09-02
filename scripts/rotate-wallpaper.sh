@@ -142,47 +142,109 @@ else
     fi
 fi
 
-# Handle Conky theme update
-if pgrep -x "conky" > /dev/null; then
-    echo "Conky is running, sending reload signal..." >> "$HOME/.local/share/wallpaper-sync.log"
-    
-    # Try to reload Conky configuration without killing it
-    pkill -SIGUSR1 conky 2>/dev/null
-    
-    # If that doesn't work, restart it
-    if [ $? -ne 0 ]; then
-        echo "Restarting Conky for theme change..." >> "$HOME/.local/share/wallpaper-sync.log"
+# Handle Conky theme update for all monitors
+if command -v xrandr >/dev/null 2>&1; then
+    # Clean up old temporary Conky configs
+    rm -f /tmp/conky-*.conf 2>/dev/null
+    echo "Cleaned up old temporary Conky configs" >> "$HOME/.local/share/wallpaper-sync.log"
+
+    # Log minimum_width from conky.conf for debugging
+    if [ -f "$CONKY_CONFIG" ]; then
+        minimum_width=$(grep -E 'minimum_width|minimum_size' "$CONKY_CONFIG" | awk '{print $3}' | head -n1)
+        echo "Conky minimum_width from $CONKY_CONFIG: ${minimum_width:-not set}" >> "$HOME/.local/share/wallpaper-sync.log"
+    fi
+
+    # Kill existing Conky instances
+    if pgrep -x "conky" > /dev/null; then
+        echo "Killing existing Conky instances..." >> "$HOME/.local/share/wallpaper-sync.log"
         pkill -x conky
         sleep 1
-        
+    fi
+
+    # Get connected monitors and their geometries
+    mapfile -t MONITORS < <(xrandr --current | grep -w connected | grep -v disconnected | awk '{print $1, $3}')
+    
+    if [ ${#MONITORS[@]} -eq 0 ]; then
+        echo "Warning: No connected monitors detected, starting Conky with default config..." >> "$HOME/.local/share/wallpaper-sync.log"
         if [ -f "$CONKY_CONFIG" ]; then
-            nohup conky -c "$CONKY_CONFIG" >/dev/null 2>&1 &
-            sleep 2  # Give it time to start
-            
+            nohup conky -c "$CONKY_CONFIG" > "$HOME/.local/share/conky-default.log" 2>&1 &
+            sleep 2
             if pgrep -x "conky" > /dev/null; then
-                echo "Conky restarted successfully with $THEME theme" >> "$HOME/.local/share/wallpaper-sync.log"
+                echo "Conky started with $THEME theme on default screen (PID: $!)" >> "$HOME/.local/share/wallpaper-sync.log"
             else
-                echo "ERROR: Conky failed to restart" >> "$HOME/.local/share/wallpaper-sync.log"
-                # Try to start it again
-                nohup conky -c "$CONKY_CONFIG" >/dev/null 2>&1 &
+                echo "ERROR: Failed to start Conky on default screen. Check $HOME/.local/share/conky-default.log" >> "$HOME/.local/share/wallpaper-sync.log"
             fi
         else
             echo "Warning: Conky config not found at $CONKY_CONFIG" >> "$HOME/.local/share/wallpaper-sync.log"
         fi
     else
-        echo "Conky configuration reloaded with $THEME theme" >> "$HOME/.local/share/wallpaper-sync.log"
+        echo "Detected ${#MONITORS[@]} connected monitors: ${MONITORS[*]}" >> "$HOME/.local/share/wallpaper-sync.log"
+        for monitor in "${MONITORS[@]}"; do
+            # Extract monitor name and geometry (e.g., "1920x1080+0+0")
+            monitor_name=$(echo "$monitor" | awk '{print $1}')
+            geometry=$(echo "$monitor" | awk '{print $2}')
+            x_offset=$(echo "$geometry" | cut -d'+' -f2)
+            y_offset=$(echo "$geometry" | cut -d'+' -f3)
+            width=$(echo "$geometry" | cut -d'x' -f1)
+            
+            # Set positioning parameters based on monitor
+            if [ "$monitor_name" = "eDP-1" ]; then
+                # For primary monitor (eDP-1), use top_right with small gap_x
+                alignment="top_right"
+                gap_x=25  # 25 pixels from right edge
+                gap_y=35
+            else
+                # For secondary monitor (HDMI-A-2), use absolute positioning
+                alignment="top_left"
+                gap_x=$((x_offset + width - 280 - 25))  # 280 is assumed minimum_width
+                gap_y=35
+            fi
+            
+            echo "Configuring Conky for monitor $monitor_name at offset ${x_offset}x${y_offset}, width $width, gap_x=$gap_x, gap_y=$gap_y, alignment=$alignment" >> "$HOME/.local/share/wallpaper-sync.log"
+            
+            # Create temporary Conky config for this monitor
+            temp_config=$(mktemp /tmp/conky-$monitor_name-XXXXXX.conf)
+            cp "$CONKY_CONFIG" "$temp_config"
+            
+            # Modify gap_x, gap_y, and alignment in the temporary config
+            sed -i "s/gap_x = [0-9-]*/gap_x = $gap_x/" "$temp_config"
+            sed -i "s/gap_y = [0-9]*/gap_y = $gap_y/" "$temp_config"
+            sed -i "s/alignment = '[^']*'/alignment = '$alignment'/" "$temp_config"
+            # Remove xinerama_head if present
+            sed -i "/xinerama_head/d" "$temp_config"
+            
+            # Start Conky instance for this monitor
+            if [ -f "$temp_config" ]; then
+                nohup conky -c "$temp_config" > "$HOME/.local/share/conky-$monitor_name.log" 2>&1 &
+                conky_pid=$!
+                sleep 1
+                if pgrep -f "conky -c $temp_config" > /dev/null; then
+                    echo "Conky started for monitor $monitor_name with $THEME theme (PID: $conky_pid)" >> "$HOME/.local/share/wallpaper-sync.log"
+                else
+                    echo "ERROR: Failed to start Conky for monitor $monitor_name. Check $HOME/.local/share/conky-$monitor_name.log" >> "$HOME/.local/share/wallpaper-sync.log"
+                    # Retry once
+                    nohup conky -c "$temp_config" > "$HOME/.local/share/conky-$monitor_name-retry.log" 2>&1 &
+                    sleep 1
+                    if pgrep -f "conky -c $temp_config" > /dev/null; then
+                        echo "Conky started on retry for monitor $monitor_name with $THEME theme" >> "$HOME/.local/share/wallpaper-sync.log"
+                    else
+                        echo "ERROR: Retry failed to start Conky for monitor $monitor_name. Check $HOME/.local/share/conky-$monitor_name-retry.log" >> "$HOME/.local/share/wallpaper-sync.log"
+                    fi
+                fi
+            else
+                echo "Warning: Failed to create temporary Conky config for $monitor_name" >> "$HOME/.local/share/wallpaper-sync.log"
+            fi
+        done
     fi
 else
-    # Conky is not running, start it
-    echo "Starting Conky with $THEME theme..." >> "$HOME/.local/share/wallpaper-sync.log"
+    echo "Warning: xrandr not found, starting Conky with default config..." >> "$HOME/.local/share/wallpaper-sync.log"
     if [ -f "$CONKY_CONFIG" ]; then
-        nohup conky -c "$CONKY_CONFIG" >/dev/null 2>&1 &
+        nohup conky -c "$CONKY_CONFIG" > "$HOME/.local/share/conky-default.log" 2>&1 &
         sleep 2
-        
         if pgrep -x "conky" > /dev/null; then
-            echo "Conky started successfully with $THEME theme" >> "$HOME/.local/share/wallpaper-sync.log"
+            echo "Conky started with $THEME theme on default screen (PID: $!)" >> "$HOME/.local/share/wallpaper-sync.log"
         else
-            echo "ERROR: Failed to start Conky" >> "$HOME/.local/share/wallpaper-sync.log"
+            echo "ERROR: Failed to start Conky on default screen. Check $HOME/.local/share/conky-default.log" >> "$HOME/.local/share/wallpaper-sync.log"
         fi
     else
         echo "Warning: Conky config not found at $CONKY_CONFIG" >> "$HOME/.local/share/wallpaper-sync.log"
@@ -296,7 +358,6 @@ if command -v konsole >/dev/null 2>&1; then
 else
     echo "Konsole not installed" >> "$HOME/.local/share/wallpaper-sync.log"
 fi
-
 
 # Final status
 echo "Theme sync completed: $THEME (Color scheme applied: ${SCHEME_APPLIED:-false})" >> "$HOME/.local/share/wallpaper-sync.log"

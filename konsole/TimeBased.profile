@@ -1,6 +1,6 @@
 [Appearance]
 BorderWhenActive=false
-ColorScheme=Night
+ColorScheme=Noon
 
 [General]
 Command=/usr/bin/fish
