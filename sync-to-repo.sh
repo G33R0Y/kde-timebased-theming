@@ -123,6 +123,16 @@ if [ -f "$REPO_DIR/sync-to-repo copy.sh" ]; then
     echo "WARNING: Found 'sync-to-repo copy.sh' in $REPO_DIR. Consider removing if not needed." | tee -a "$LOG_FILE"
 fi
 
+# Ensure sync-to-repo.sh and local logs are ignored
+if [ ! -f "$REPO_DIR/.gitignore" ]; then
+    echo "Creating .gitignore..." | tee -a "$LOG_FILE"
+    touch "$REPO_DIR/.gitignore"
+fi
+
+grep -qxF 'sync-to-repo.sh' "$REPO_DIR/.gitignore" || echo 'sync-to-repo.sh' >> "$REPO_DIR/.gitignore"
+grep -qxF 'sync-to-repo copy.sh' "$REPO_DIR/.gitignore" || echo 'sync-to-repo copy.sh' >> "$REPO_DIR/.gitignore"
+grep -qxF '*.log' "$REPO_DIR/.gitignore" || echo '*.log' >> "$REPO_DIR/.gitignore"
+
 # Git operations
 echo "==> Git add + commit + push [$(date)]" | tee -a "$LOG_FILE"
 cd "$REPO_DIR"
