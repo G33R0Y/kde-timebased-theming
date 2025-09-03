@@ -15,10 +15,10 @@ A `systemd --user` timer applies changes **4× per day** (00:00, 06:00, 12:00, 1
 
 | Time Window | Wallpaper | Plasma Scheme | Konsole Scheme | VSCode Theme | Lockscreen Video |
 |---|---|---|---|---|---|
-| 06:00–11:59 (Sunrise) | `wallpapers/sunrise.png` | `Sunrise.colors` | `Sunrise.colorscheme` | Palenight (Mild Contrast) | `lockscreen/sunrise.mp4` |
-| 12:00–17:59 (Noon) | `wallpapers/noon.png` | `Noon.colors` | `Noon.colorscheme` | Material Theme High Contrast | `lockscreen/noon.mp4` |
-| 18:00–23:59 (Sunset) | `wallpapers/sunset.png` | `Sunset.colors` | `Sunset.colorscheme` | Kimbie Dark | `lockscreen/sunset.mp4` |
-| 00:00–05:59 (Night) | `wallpapers/night.png` | `Night.colors` | `Night.colorscheme` | Night Owl | `lockscreen/night.mp4` |
+| 06:00–11:59 (Sunrise) | `wallpapers/sunrise.png` | `Sunrise.colors` | `Sunrise.colorscheme` | Palenight (Mild Contrast) | `lockscreen/sunrise_screeny.mp4` |
+| 12:00–17:59 (Noon) | `wallpapers/noon.png` | `Noon.colors` | `Noon.colorscheme` | Material Theme High Contrast | `lockscreen/noon_screeny.mp4` |
+| 18:00–23:59 (Sunset) | `wallpapers/sunset.png` | `Sunset.colors` | `Sunset.colorscheme` | Kimbie Dark | `lockscreen/sunset_screeny.mp4` |
+| 00:00–05:59 (Night) | `wallpapers/night.png` | `Night.colors` | `Night.colorscheme` | Night Owl | `lockscreen/night_screeny.mp4` |
 
 > ⏱️ The timer units `theme-sync.service` / `theme-sync.timer` handle automatic switching.
 
